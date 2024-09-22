@@ -6,8 +6,6 @@
 #include <freefare.h>
 #include "freefare_internal.h"
 
-static inline void update_key_schedules(MifareDESFireKey key);
-
 static inline void
 update_key_schedules(MifareDESFireKey key)
 {
