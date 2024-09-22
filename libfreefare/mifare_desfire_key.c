@@ -109,6 +109,12 @@ mifare_desfire_aes_key_new_with_version(const uint8_t value[16], uint8_t version
     return key;
 }
 
+MifareKeyType
+mifare_desfire_key_get_type(MifareDESFireKey key)
+{
+    return key->type;
+}
+
 uint8_t
 mifare_desfire_key_get_version(MifareDESFireKey key)
 {

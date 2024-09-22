@@ -31,6 +31,7 @@
 .Nm mifare_desfire_3des_key_new_with_version ,
 .Nm mifare_desfire_3k3des_key_new_with_version ,
 .Nm mifare_desfire_aes_key_new _with_version,
+.Nm mifare_desfire_key_get_type ,
 .Nm mifare_desfire_key_get_version ,
 .Nm mifare_desfire_key_set_version ,
 .Nm mifare_desfire_key_free
@@ -67,6 +68,8 @@ Mifare card manipulation library (libfreefare, \-lfreefare)
 .Fn mifare_desfire_3k3des_key_new_with_version "uint8_t value[24]"
 .Ft MifareDESFireKey
 .Fn mifare_desfire_aes_key_new_with_version "uint8_t value[16]" "uint8_t version"
+.Ft MifareKeyType
+.Fn mifare_desfire_key_get_type "MifareDESFireKey key"
 .Ft uint8_t
 .Fn mifare_desfire_key_get_version "MifareDESFireKey key"
 .Ft void
