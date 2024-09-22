@@ -160,10 +160,10 @@ void		 mifare_classic_tag_free(FreefareTag tag);
 typedef unsigned char MifareClassicBlock[16];
 
 typedef uint8_t MifareClassicSectorNumber;
-typedef unsigned char MifareClassicBlockNumber;
+typedef uint8_t MifareClassicBlockNumber;
 
 typedef enum { MFC_KEY_A, MFC_KEY_B } MifareClassicKeyType;
-typedef unsigned char MifareClassicKey[6];
+typedef uint8_t MifareClassicKey[6];
 
 /* NFC Forum public key */
 extern const MifareClassicKey mifare_classic_nfcforum_public_key_a;
