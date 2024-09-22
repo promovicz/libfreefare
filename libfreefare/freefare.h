@@ -523,6 +523,9 @@ typedef enum mifare_key_type {
     MIFARE_KEY_LAST = MIFARE_KEY_AES128
 } MifareKeyType;
 
+MifareKeyType    mifare_keytype_from_string(const char *buf, size_t len);
+const char      *mifare_keytype_to_string(MifareKeyType type);
+
 MifareDESFireKey mifare_desfire_des_key_new(const uint8_t value[8]);
 MifareDESFireKey mifare_desfire_des_key_new_with_version(const uint8_t value[8]);
 MifareDESFireKey mifare_desfire_3des_key_new(const uint8_t value[16]);

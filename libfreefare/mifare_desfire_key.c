@@ -6,6 +6,41 @@
 #include <freefare.h>
 #include "freefare_internal.h"
 
+MifareKeyType
+mifare_keytype_from_string(const char *str, size_t len)
+{
+    if(strncasecmp(str, "des", 3) == 0)
+	return MIFARE_KEY_DES;
+    if(strncasecmp(str, "3des", 3) == 0)
+	return MIFARE_KEY_2K3DES;
+    if(strncasecmp(str, "2k3des", 3) == 0)
+	return MIFARE_KEY_2K3DES;
+    if(strncasecmp(str, "3k3des", 3) == 0)
+	return MIFARE_KEY_3K3DES;
+    if(strncasecmp(str, "aes", 3) == 0)
+	return MIFARE_KEY_AES128;
+    if(strncasecmp(str, "aes128", 3) == 0)
+	return MIFARE_KEY_AES128;
+    return MIFARE_KEY_INVALID;
+}
+
+const char *
+mifare_keytype_to_string(MifareKeyType type)
+{
+    switch(type) {
+    case MIFARE_KEY_DES:
+	return "des";
+    case MIFARE_KEY_2K3DES:
+	return "2k3des";
+    case MIFARE_KEY_3K3DES:
+	return "3k3des";
+    case MIFARE_KEY_AES128:
+	return "aes128";
+    default:
+	return NULL;
+    }
+}
+
 static inline void
 update_key_schedules(MifareDESFireKey key)
 {
