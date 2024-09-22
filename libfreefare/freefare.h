@@ -41,6 +41,15 @@ typedef struct ntag21x_key *NTAG21xKey;
 typedef uint8_t MifareUltralightPageNumber;
 typedef unsigned char MifareUltralightPage[4];
 
+struct mifare_key_deriver;
+typedef struct mifare_key_deriver *MifareKeyDeriver;
+
+const char	*freefare_version(void);
+
+const char	*freefare_strerror(FreefareTag tag);
+int		 freefare_strerror_r(FreefareTag tag, char *buffer, size_t len);
+void		 freefare_perror(FreefareTag tag, const char *string);
+
 FreefareTag	*freefare_get_tags(nfc_device *device);
 FreefareTag	 freefare_tag_new(nfc_device *device, nfc_target target);
 enum freefare_tag_type freefare_get_tag_type(FreefareTag tag);
@@ -51,13 +60,6 @@ void		 freefare_free_tags(FreefareTag *tags);
 bool		 freefare_selected_tag_is_present(nfc_device *device);
 void		 freefare_set_tag_timeout(FreefareTag tag, int timeout);
 
-const char	*freefare_version(void);
-
-const char	*freefare_strerror(FreefareTag tag);
-int		 freefare_strerror_r(FreefareTag tag, char *buffer, size_t len);
-void		 freefare_perror(FreefareTag tag, const char *string);
-
-
 
 bool		 felica_taste(nfc_device *device, nfc_target target);
 
@@ -534,13 +536,6 @@ uint8_t		 mifare_desfire_key_get_version(MifareDESFireKey key);
 void		 mifare_desfire_key_set_version(MifareDESFireKey key, uint8_t version);
 void		 mifare_desfire_key_free(MifareDESFireKey key);
 
-uint8_t		*tlv_encode(const uint8_t type, const uint8_t *istream, uint16_t isize, size_t *osize);
-uint8_t		*tlv_decode(const uint8_t *istream, uint8_t *type, uint16_t *size);
-size_t		tlv_record_length(const uint8_t *istream, size_t *field_length_size, size_t *field_value_size);
-uint8_t		*tlv_append(uint8_t *a, uint8_t *b);
-
-struct mifare_key_deriver;
-typedef struct mifare_key_deriver *MifareKeyDeriver;
 
 #define AN10922_FLAG_DEFAULT            0
 #define AN10922_FLAG_EMULATE_ISSUE_91   (1<<1)
@@ -554,6 +549,11 @@ int		 mifare_key_deriver_update_cstr(MifareKeyDeriver deriver, const char *cstr)
 MifareDESFireKey mifare_key_deriver_end(MifareKeyDeriver deriver);
 int		 mifare_key_deriver_end_raw(MifareKeyDeriver deriver, uint8_t* diversified_bytes, size_t data_max_len);
 void		 mifare_key_deriver_free(MifareKeyDeriver state);
+
+uint8_t		*tlv_encode(const uint8_t type, const uint8_t *istream, uint16_t isize, size_t *osize);
+uint8_t		*tlv_decode(const uint8_t *istream, uint8_t *type, uint16_t *size);
+size_t		tlv_record_length(const uint8_t *istream, size_t *field_length_size, size_t *field_value_size);
+uint8_t		*tlv_append(uint8_t *a, uint8_t *b);
 
 #ifdef __cplusplus
 }
