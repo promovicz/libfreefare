@@ -532,6 +532,7 @@ MifareDESFireKey mifare_desfire_3k3des_key_new_with_version(const uint8_t value[
 MifareDESFireKey mifare_desfire_aes_key_new(const uint8_t value[16]);
 MifareDESFireKey mifare_desfire_aes_key_new_with_version(const uint8_t value[16], uint8_t version);
 MifareKeyType	 mifare_desfire_key_get_type(MifareDESFireKey key);
+size_t		 mifare_desfire_key_get_length(MifareDESFireKey key);
 uint8_t		 mifare_desfire_key_get_version(MifareDESFireKey key);
 void		 mifare_desfire_key_set_version(MifareDESFireKey key, uint8_t version);
 void		 mifare_desfire_key_free(MifareDESFireKey key);

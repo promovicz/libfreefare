@@ -113,6 +113,23 @@ mifare_desfire_key_get_type(MifareDESFireKey key)
     return key->type;
 }
 
+size_t
+mifare_desfire_key_get_length(MifareDESFireKey key)
+{
+    switch(key->type) {
+    case MIFARE_KEY_DES:
+	return 8;
+    case MIFARE_KEY_2K3DES:
+	return 16;
+    case MIFARE_KEY_3K3DES:
+	return 24;
+    case MIFARE_KEY_AES128:
+	return 16;
+    default:
+	return 0;
+    }
+}
+
 uint8_t
 mifare_desfire_key_get_version(MifareDESFireKey key)
 {
