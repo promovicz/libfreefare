@@ -31,7 +31,7 @@ mifare_desfire_des_key_new_with_version(const uint8_t value[8])
 {
     MifareDESFireKey key;
 
-    if ((key = malloc(sizeof(struct mifare_desfire_key)))) {
+    if ((key = calloc(1, sizeof(struct mifare_desfire_key)))) {
 	key->type = MIFARE_KEY_DES;
 	memcpy(key->data, value, 8);
 	memcpy(key->data + 8, value, 8);
@@ -57,7 +57,7 @@ mifare_desfire_3des_key_new_with_version(const uint8_t value[16])
 {
     MifareDESFireKey key;
 
-    if ((key = malloc(sizeof(struct mifare_desfire_key)))) {
+    if ((key = calloc(1, sizeof(struct mifare_desfire_key)))) {
 	key->type = MIFARE_KEY_2K3DES;
 	memcpy(key->data, value, 16);
 	update_key_schedules(key);
@@ -80,7 +80,7 @@ mifare_desfire_3k3des_key_new_with_version(const uint8_t value[24])
 {
     MifareDESFireKey key;
 
-    if ((key = malloc(sizeof(struct mifare_desfire_key)))) {
+    if ((key = calloc(1, sizeof(struct mifare_desfire_key)))) {
 	key->type = MIFARE_KEY_3K3DES;
 	memcpy(key->data, value, 24);
 	update_key_schedules(key);
@@ -99,7 +99,7 @@ mifare_desfire_aes_key_new_with_version(const uint8_t value[16], uint8_t version
 {
     MifareDESFireKey key;
 
-    if ((key = malloc(sizeof(struct mifare_desfire_key)))) {
+    if ((key = calloc(1, sizeof(struct mifare_desfire_key)))) {
 	memcpy(key->data, value, 16);
 	key->type = MIFARE_KEY_AES128;
 	key->aes_version = version;
