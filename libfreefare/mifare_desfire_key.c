@@ -98,6 +98,25 @@ mifare_desfire_key_new(MifareKeyType type, uint8_t version, const void *buf, siz
     return key;
 }
 
+int
+mifare_desfire_key_from_string(MifareDESFireKey *out, const char *buf, size_t len)
+{
+    return NULL;
+}
+
+int
+mifare_desfire_key_to_string(MifareDESFireKey key, char *buf, size_t len)
+{
+    /* Convert the key type */
+    const char *type = mifare_keytype_to_string(key->type);
+    /* Get the key version */
+    uint8_t version = mifare_desfire_key_get_version(key);
+    /* Get the key length */
+    size_t length = mifare_desfire_key_get_length(key);
+    /* Format into buffer */
+    return snprintf(buf, len, "%s:%d:%s", type, version);
+}
+
 MifareDESFireKey
 mifare_desfire_des_key_new(const uint8_t value[8])
 {
