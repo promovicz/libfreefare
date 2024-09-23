@@ -52,6 +52,53 @@ update_key_schedules(MifareDESFireKey key)
 }
 
 MifareDESFireKey
+mifare_desfire_key_new(MifareKeyType type, uint8_t version, const void *buf, size_t len)
+{
+    MifareDESFireKey key = NULL;
+    union {
+	uint8_t s24[24];
+	uint8_t s16[16];
+	uint8_t s8[8];
+    } su;
+
+    /* Construct key depending on key type */
+    switch(type) {
+    case MIFARE_KEY_DES:
+	if(len == 8) {
+	    memcpy(&su.s8, buf, 8);
+	    key = mifare_desfire_des_key_new(su.s8);
+	}
+	break;
+    case MIFARE_KEY_2K3DES:
+	if(len == 16) {
+	    memcpy(&su.s16, buf, 16);
+	    key = mifare_desfire_3des_key_new(su.s16);
+	}
+	break;
+    case MIFARE_KEY_3K3DES:
+	if(len == 24) {
+	    memcpy(&su.s24, buf, 24);
+	    key = mifare_desfire_3k3des_key_new(su.s24);
+	}
+	break;
+    case MIFARE_KEY_AES128:
+	if(len == 16) {
+	    memcpy(&su.s16, buf, 16);
+	    key = mifare_desfire_aes_key_new(su.s16);
+	}
+	break;
+    }
+
+    /* Set the key version */
+    if(key != NULL) {
+	mifare_desfire_key_set_version(key, version);
+    }
+
+    /* Done */
+    return key;
+}
+
+MifareDESFireKey
 mifare_desfire_des_key_new(const uint8_t value[8])
 {
     uint8_t data[8];

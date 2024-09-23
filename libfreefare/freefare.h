@@ -526,6 +526,7 @@ typedef enum mifare_key_type {
 MifareKeyType    mifare_keytype_from_string(const char *buf, size_t len);
 const char      *mifare_keytype_to_string(MifareKeyType type);
 
+MifareDESFireKey mifare_desfire_key_new(MifareKeyType type, uint8_t version, const void *buf, size_t len);
 MifareDESFireKey mifare_desfire_des_key_new(const uint8_t value[8]);
 MifareDESFireKey mifare_desfire_des_key_new_with_version(const uint8_t value[8]);
 MifareDESFireKey mifare_desfire_3des_key_new(const uint8_t value[16]);
