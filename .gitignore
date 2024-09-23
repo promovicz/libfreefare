@@ -35,6 +35,7 @@ examples/mifare-desfire-info
 examples/mifare-desfire-read-ndef
 examples/mifare-desfire-write-ndef
 examples/mifare-ultralight-info
+examples/mifare-ultralightc-diversify
 examples/ntag-detect
 examples/ntag-removeauth
 examples/ntag-setauth
