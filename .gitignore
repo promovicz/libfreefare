@@ -26,7 +26,6 @@ examples/felica-read-ndef
 examples/mifare-classic-format
 examples/mifare-classic-read-ndef
 examples/mifare-classic-write-ndef
-examples/mifare-desfire-access
 examples/mifare-desfire-create-ndef
 examples/mifare-desfire-ev1-configure-ats
 examples/mifare-desfire-ev1-configure-default-key

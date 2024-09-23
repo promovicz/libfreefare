@@ -2,7 +2,6 @@ set(EXAMPLES-SOURCES
         mifare-classic-format
         mifare-classic-read-ndef
         mifare-classic-write-ndef
-        mifare-desfire-access
         mifare-desfire-create-ndef
         mifare-desfire-format
         mifare-desfire-info

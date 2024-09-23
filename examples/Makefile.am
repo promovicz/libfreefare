@@ -6,7 +6,6 @@ bin_PROGRAMS = felica-lite-dump \
 	       mifare-classic-format \
 	       mifare-classic-write-ndef \
 	       mifare-classic-read-ndef \
-	       mifare-desfire-access \
 	       mifare-desfire-create-ndef \
 	       mifare-desfire-ev1-configure-ats \
 	       mifare-desfire-ev1-configure-default-key \
