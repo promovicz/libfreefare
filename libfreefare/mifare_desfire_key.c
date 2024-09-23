@@ -121,9 +121,12 @@ MifareDESFireKey
 mifare_desfire_des_key_new(const uint8_t value[8])
 {
     uint8_t data[8];
+    /* Copy the secret */
     memcpy(data, value, 8);
+    /* Mask out version bits */
     for (int n = 0; n < 8; n++)
 	data[n] &= 0xfe;
+    /* Construct with version zero */
     return mifare_desfire_des_key_new_with_version(data);
 }
 
@@ -131,7 +134,7 @@ MifareDESFireKey
 mifare_desfire_des_key_new_with_version(const uint8_t value[8])
 {
     MifareDESFireKey key;
-
+    /* Allocate and initialize */
     if ((key = calloc(1, sizeof(struct mifare_desfire_key)))) {
 	key->type = MIFARE_KEY_DES;
 	memcpy(key->data, value, 8);
@@ -145,11 +148,14 @@ MifareDESFireKey
 mifare_desfire_3des_key_new(const uint8_t value[16])
 {
     uint8_t data[16];
+    /* Copy the secret */
     memcpy(data, value, 16);
+    /* Mask out version bits */
     for (int n = 0; n < 8; n++)
 	data[n] &= 0xfe;
     for (int n = 8; n < 16; n++)
 	data[n] |= 0x01;
+    /* Construct with version zero */
     return mifare_desfire_3des_key_new_with_version(data);
 }
 
@@ -157,7 +163,7 @@ MifareDESFireKey
 mifare_desfire_3des_key_new_with_version(const uint8_t value[16])
 {
     MifareDESFireKey key;
-
+    /* Allocate and initialize */
     if ((key = calloc(1, sizeof(struct mifare_desfire_key)))) {
 	key->type = MIFARE_KEY_2K3DES;
 	memcpy(key->data, value, 16);
@@ -170,9 +176,12 @@ MifareDESFireKey
 mifare_desfire_3k3des_key_new(const uint8_t value[24])
 {
     uint8_t data[24];
+    /* Copy the secret */
     memcpy(data, value, 24);
+    /* Mask out version bits */
     for (int n = 0; n < 8; n++)
 	data[n] &= 0xfe;
+    /* Construct with version zero */
     return mifare_desfire_3k3des_key_new_with_version(data);
 }
 
@@ -180,7 +189,7 @@ MifareDESFireKey
 mifare_desfire_3k3des_key_new_with_version(const uint8_t value[24])
 {
     MifareDESFireKey key;
-
+    /* Allocate and initialize */
     if ((key = calloc(1, sizeof(struct mifare_desfire_key)))) {
 	key->type = MIFARE_KEY_3K3DES;
 	memcpy(key->data, value, 24);
@@ -192,6 +201,7 @@ mifare_desfire_3k3des_key_new_with_version(const uint8_t value[24])
 MifareDESFireKey
 mifare_desfire_aes_key_new(const uint8_t value[16])
 {
+    /* Construct with version zero */
     return mifare_desfire_aes_key_new_with_version(value, 0);
 }
 
@@ -199,7 +209,7 @@ MifareDESFireKey
 mifare_desfire_aes_key_new_with_version(const uint8_t value[16], uint8_t version)
 {
     MifareDESFireKey key;
-
+    /* Allocate and initialize */
     if ((key = calloc(1, sizeof(struct mifare_desfire_key)))) {
 	memcpy(key->data, value, 16);
 	key->type = MIFARE_KEY_AES128;
