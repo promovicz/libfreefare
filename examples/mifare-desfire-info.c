@@ -12,11 +12,10 @@
 
 /* Declarations */
 
-static void scan_tag(FreefareTag tag);
+static void scan_device(nfc_connstring dev);
+static void scan_tag(nfc_connstring dev, FreefareTag tag);
 static void scan_file(FreefareTag tag, MifareDESFireAID app, uint8_t fid);
 static void scan_application(FreefareTag tag, MifareDESFireAID app);
-
-/* Main program */
 
 int
 main(int argc, char *argv[])
@@ -24,7 +23,6 @@ main(int argc, char *argv[])
     nfc_context *context;
     nfc_connstring devices[MAX_NFC_DEVICES];
     size_t device_count;
-    size_t tags_found = 0;
 
     if (argc > 1)
 	errx(EXIT_FAILURE, "usage: %s", argv[0]);
@@ -35,60 +33,19 @@ main(int argc, char *argv[])
 	errx(EXIT_FAILURE, "Unable to init libnfc (malloc)");
 
     /* List NFC devices */
-    device_count = nfc_list_devices(context, devices, MAX_DEVICES);
+    device_count = nfc_list_devices(context, devices, MAX_NFC_DEVICES);
     if (device_count <= 0)
 	errx(EXIT_FAILURE, "No NFC device found.");
 
     /* Scan each device */
     for (size_t d = 0; d < device_count; d++) {
-
-	/* Open the device */
-	nfc_device *device = nfc_open(context, devices[d]);
-	if (!device) {
-	    warnx("nfc_open() failed.");
-	    goto skip_all;
-	}
-
-	/* Retrieve list of tags */
-	FreefareTag *tags = freefare_get_tags(device);
-	if (!tags) {
-	    nfc_close(device);
-	    warnx("Error listing tags.");
-	    goto skip_tags;
-	}
-
-	/* Scan tags (we allow errors) */
-	for (int i = 0; tags[i]; i++) {
-	    FreefareTag tag = tags[i];
-
-	    /* We are only interested in DESFire tags */
-	    if (MIFARE_DESFIRE != freefare_get_tag_type(tag))
-		continue;
-
-	    /* Count the tags that we have found */
-	    tags_found++;
-
-	    /* Print whitespace */
-	    printf("\n");
-
-	    /* Scan the tag and print info */
-	    scan_tag(tag);
-	}
-
-	/* Free tag list */
-	freefare_free_tags(tags);
-
-    skip_tags:
-	/* Close the device */
-	nfc_close(device);
-
-    skip_all:
+	scan_device(&devices[d]);
     }
 
     /* Print whitespace */
-    if(tags_found > 0) {
-	printf("\n");
-    }
+    //if(tags_found > 0) {
+    printf("\n");
+    //}
 
     /* Finalize libnfc */
     nfc_exit(context);
@@ -97,14 +54,53 @@ main(int argc, char *argv[])
     return 0;
 }
 
-/* Implementation functions */
+static void scan_device(nfc_connstring dev) {
+    /* Open the device */
+    nfc_device *device = nfc_open(context, *dev);
+    if (!device) {
+	warnx("nfc_open() failed.");
+	goto skip_all;
+    }
 
-static void scan_tag(FreefareTag tag) {
+    /* Retrieve list of tags */
+    FreefareTag *tags = freefare_get_tags(device);
+    if (!tags) {
+	nfc_close(device);
+	warnx("Error listing tags.");
+	goto skip_tags;
+    }
+
+    /* Scan tags (we allow errors) */
+    for (int i = 0; tags[i]; i++) {
+	FreefareTag tag = tags[i];
+
+	/* We are only interested in DESFire tags */
+	if (MIFARE_DESFIRE != freefare_get_tag_type(tag))
+	    continue;
+
+	/* Print whitespace */
+	printf("\n");
+
+	/* Scan the tag and print info */
+	scan_tag(*dev, tag);
+    }
+
+    /* Free tag list */
+    freefare_free_tags(tags);
+
+ skip_tags:
+    /* Close the device */
+    nfc_close(device);
+
+ skip_all:
+}
+
+static void scan_tag(nfc_connstring dev, FreefareTag tag) {
     int res;
 
     /* Get and print the announced UID */
-    char *tag_uid = freefare_get_tag_uid(tags[i]);
-    printf("desfire %s via %s\n", tag_uid, devices[d]);
+    char *tag_uid = freefare_get_tag_uid(tag);
+    printf("desfire %s via %s\n", tag_uid, dev);
     if (strlen(tag_uid) / 2 == 4) {
 	printf("  uid randomized\n");
     } else {
@@ -122,7 +118,7 @@ static void scan_tag(FreefareTag tag) {
     struct mifare_desfire_version_info info;
     res = mifare_desfire_get_version(tag, &info);
     if (res < 0) {
-	freefare_perror(tags[i], "mifare_desfire_get_version");
+	freefare_perror(tag, "mifare_desfire_get_version");
     } else {
 	printf("  version information:\n", tag_uid);
 	printf("    UID:                      0x%02x%02x%02x%02x%02x%02x%02x\n", info.uid[0], info.uid[1], info.uid[2], info.uid[3], info.uid[4], info.uid[5], info.uid[6]);
@@ -186,7 +182,7 @@ static void scan_tag(FreefareTag tag) {
 	if (AUTHENTICATION_ERROR == mifare_desfire_last_picc_error(tag)) {
 	    printf("  application list LOCKED\n");
 	} else {
-	    freefare_perror(tags[i], "mifare_desfire_get_application_ids");
+	    freefare_perror(tag, "mifare_desfire_get_application_ids");
 	}
     } else {
 	if(app_count == 0) {
@@ -222,7 +218,7 @@ static void scan_application(FreefareTag tag, MifareDESFireAID app) {
     res = mifare_desfire_select_application(tag, app);
     if(res != 0) {
 	freefare_perror(tag, "mifare_select_application");
-	continue;
+	goto skip_all;
     }
 
     /* Get settings and number of keys */
@@ -258,9 +254,11 @@ static void scan_application(FreefareTag tag, MifareDESFireAID app) {
     }
 
     /* Free the file list */
-    freefare_free(files);
+    free(files);
 
  skip_files:
+
+ skip_all:
 }
 
 static void scan_file(FreefareTag tag, MifareDESFireAID app, uint8_t fid) {
