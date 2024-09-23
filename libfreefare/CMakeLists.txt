@@ -2,6 +2,8 @@ set(LIBRARY_SOURCES
 		felica
 		freefare
 		freefare_internal
+		freefare_scan
+		freefare_tag
 		freefare_tlv
 		mad
 		mifare_application

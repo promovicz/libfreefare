@@ -81,7 +81,7 @@
 
 #define MAX_CRYPTO_BLOCK_SIZE 16
 
-void		*memdup(const void *p, const size_t n);
+void		*freefare_memdup(const void *p, const size_t n);
 
 struct mad_sector_0x00;
 struct mad_sector_0x10;

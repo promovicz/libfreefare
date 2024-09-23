@@ -5,6 +5,8 @@ lib_LTLIBRARIES = libfreefare.la
 
 libfreefare_la_SOURCES = felica.c \
 			 freefare.c \
+			 freefare_scan.c \
+			 freefare_tag.c \
 			 freefare_tlv.c \
 			 mifare_classic.c \
 			 mifare_ultralight.c \
@@ -59,7 +61,7 @@ linkedman = \
 	    freefare_error.3 freefare_strerror_r.3 \
 	    freefare_error.3 mifare_desfire_last_pcd_error.3 \
 	    freefare_error.3 mifare_desfire_last_picc_error.3 \
-            freefare_tlv.3 freefare_tlv_decode.3 \                               
+            freefare_tlv.3 freefare_tlv_decode.3 \
             freefare_tlv.3 freefare_tlv_encode.3 \
 	    mad.3 mad_free.3 \
 	    mad.3 mad_get_aid.3 \

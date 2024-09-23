@@ -882,7 +882,7 @@ mifare_desfire_get_application_ids(FreefareTag tag, MifareDESFireAID *aids[], si
 	return -1;
 
     for (size_t i = 0; i < *count; i++) {
-	if (!((*aids)[i] = memdup(p + 3 * i, 3))) {
+	if (!((*aids)[i] = freefare_memdup(p + 3 * i, 3))) {
 	    while (i--) {
 		free((*aids)[i]);
 	    }
