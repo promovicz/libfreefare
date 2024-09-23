@@ -289,7 +289,7 @@ main(int argc, char *argv[])
 		}
 
 		size_t encoded_size;
-		uint8_t *tlv_data = tlv_encode(3, ndef_msg, ndef_msg_len, &encoded_size);
+		uint8_t *tlv_data = freefare_tlv_encode(3, ndef_msg, ndef_msg_len, &encoded_size);
 
 		/*
 		 * At his point, we should have collected all information needed to

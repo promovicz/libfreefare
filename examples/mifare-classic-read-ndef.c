@@ -164,11 +164,11 @@ main(int argc, char *argv[])
 			uint8_t *tlv_data;
 			uint8_t *pbuffer = buffer;
 decode_tlv:
-			tlv_data = tlv_decode(pbuffer, &tlv_type, &tlv_data_len);
+			tlv_data = freefare_tlv_decode(pbuffer, &tlv_type, &tlv_data_len);
 			switch (tlv_type) {
 			case 0x00:
 			    fprintf(message_stream, "NFC Forum application contains a \"NULL TLV\", Skipping...\n");	// According to [ANNFC1K4K], we skip this Tag to read further TLV blocks.
-			    pbuffer += tlv_record_length(pbuffer, NULL, NULL);
+			    pbuffer += freefare_tlv_record_length(pbuffer, NULL, NULL);
 			    if (pbuffer >= buffer + sizeof(buffer)) {
 				error = EXIT_FAILURE;
 				goto error;
@@ -180,7 +180,7 @@ decode_tlv:
 			    break;
 			case 0xFD:
 			    fprintf(message_stream, "NFC Forum application contains a \"Proprietary TLV\", Skipping...\n");	// According to [ANNFC1K4K], we can skip this TLV to read further TLV blocks.
-			    pbuffer += tlv_record_length(pbuffer, NULL, NULL);
+			    pbuffer += freefare_tlv_record_length(pbuffer, NULL, NULL);
 			    if (pbuffer >= buffer + sizeof(buffer)) {
 				error = EXIT_FAILURE;
 				goto error;
