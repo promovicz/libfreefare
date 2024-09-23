@@ -11,6 +11,10 @@
 extern "C" {
 #endif // __cplusplus
 
+/******** Freefare types *****************************************************/
+
+/* Generic */
+
 enum freefare_tag_type {
     FELICA,
     MIFARE_MINI,
@@ -32,17 +36,74 @@ typedef struct freefare_tag *FreefareTag;
 /* Replace any MifareTag by the generic FreefareTag. */
 typedef struct freefare_tag *MifareTag __attribute__((deprecated));
 
-struct mifare_desfire_key;
-typedef struct mifare_desfire_key *MifareDESFireKey;
+/* Mifare Classic */
 
-struct ntag21x_key;
-typedef struct ntag21x_key *NTAG21xKey;
+typedef uint8_t MifareClassicBlock[16];
+
+typedef uint8_t MifareClassicSectorNumber;
+typedef uint8_t MifareClassicBlockNumber;
+
+typedef enum { MFC_KEY_A, MFC_KEY_B } MifareClassicKeyType;
+typedef uint8_t MifareClassicKey[6];
+
+/* Mifare Application Directory (for Mifare Classic) */
+
+struct mad_aid {
+    uint8_t application_code;
+    uint8_t function_cluster_code;
+};
+typedef struct mad_aid MadAid;
+
+struct mad;
+typedef struct mad *Mad;
+
+/* Mifare Ultralight */
 
 typedef uint8_t MifareUltralightPageNumber;
 typedef unsigned char MifareUltralightPage[4];
 
+/* Mifare DESFire */
+
+typedef enum mifare_key_type {
+    MIFARE_KEY_DES,
+    MIFARE_KEY_2K3DES,
+    MIFARE_KEY_3K3DES,
+    MIFARE_KEY_AES128,
+
+    MIFARE_KEY_LAST = MIFARE_KEY_AES128,
+    MIFARE_KEY_INVALID = MIFARE_KEY_LAST + 1,
+} MifareKeyType;
+
+struct mifare_desfire_key;
+typedef struct mifare_desfire_key *MifareDESFireKey;
+
 struct mifare_key_deriver;
 typedef struct mifare_key_deriver *MifareKeyDeriver;
+
+struct mifare_desfire_aid;
+typedef struct mifare_desfire_aid *MifareDESFireAID;
+
+struct mifare_desfire_df {
+    uint32_t aid;
+    uint16_t fid;
+    uint8_t df_name[16];
+    size_t df_name_len;
+};
+typedef struct mifare_desfire_df MifareDESFireDF;
+
+/* NTAG */
+
+enum ntag_tag_subtype {
+    NTAG_UNKNOWN,
+    NTAG_213,
+    NTAG_215,
+    NTAG_216
+};
+
+struct ntag21x_key;
+typedef struct ntag21x_key *NTAG21xKey;
+
+/******** Freefare general functions *****************************************/
 
 const char	*freefare_version(void);
 
@@ -50,7 +111,12 @@ const char	*freefare_strerror(FreefareTag tag);
 int		 freefare_strerror_r(FreefareTag tag, char *buffer, size_t len);
 void		 freefare_perror(FreefareTag tag, const char *string);
 
+/******** Freefare scan functions ********************************************/
+
 FreefareTag	*freefare_get_tags(nfc_device *device);
+
+/******** Freefare tag functions *********************************************/
+
 FreefareTag	 freefare_tag_new(nfc_device *device, nfc_target target);
 enum freefare_tag_type freefare_get_tag_type(FreefareTag tag);
 const char	*freefare_get_tag_friendly_name(FreefareTag tag);
@@ -61,10 +127,12 @@ bool		 freefare_selected_tag_is_present(nfc_device *device);
 void		 freefare_set_tag_timeout(FreefareTag tag, int timeout);
 
 
-bool		 felica_taste(nfc_device *device, nfc_target target);
+/******** Felica functions ***************************************************/
 
 #define FELICA_SC_RW 0x0009
 #define FELICA_SC_RO 0x000b
+
+bool		 felica_taste(nfc_device *device, nfc_target target);
 
 FreefareTag	 felica_tag_new(nfc_device *device, nfc_target target);
 void		 felica_tag_free(FreefareTag tag);
@@ -74,7 +142,7 @@ ssize_t		 felica_read_ex(FreefareTag tag, uint16_t service, uint8_t block_count,
 ssize_t		 felica_write(FreefareTag tag, uint16_t service, uint8_t block, uint8_t *data, size_t length);
 ssize_t		 felica_write_ex(FreefareTag tag, uint16_t service, uint8_t block_count, uint8_t blocks[], uint8_t *data, size_t length);
 
-
+/******** Mifare Ultralight functions *****************************************/
 
 bool		 mifare_ultralight_taste(nfc_device *device, nfc_target target);
 bool		 mifare_ultralightc_taste(nfc_device *device, nfc_target target);
@@ -95,7 +163,7 @@ bool		 is_mifare_ultralight(FreefareTag tag);
 bool		 is_mifare_ultralightc(FreefareTag tag);
 bool		 is_mifare_ultralightc_on_reader(nfc_device *device, nfc_iso14443a_info nai);
 
-
+/******** NTAG21x functions **************************************************/
 
 bool		 ntag21x_taste(nfc_device *device, nfc_target target);
 uint8_t		 ntag21x_last_error(FreefareTag tag);
@@ -107,17 +175,8 @@ uint8_t		 ntag21x_last_error(FreefareTag tag);
 #define NTAG_NFC_CNT_PWD_PROT 0x10
 #define NTAG_AUTHLIM 0x07
 
-enum ntag_tag_subtype {
-    NTAG_UNKNOWN,
-    NTAG_213,
-    NTAG_215,
-    NTAG_216
-};
-
 FreefareTag	 ntag21x_tag_new(nfc_device *device, nfc_target target);
 FreefareTag	 ntag21x_tag_reuse(FreefareTag tag);  /* Copy data from Ultralight tag to new NTAG21x, don't forget to free your old tag */
-NTAG21xKey	 ntag21x_key_new(const uint8_t data[4], const uint8_t pack[2]); /* Create new key */
-void		 ntag21x_key_free(NTAG21xKey key);  /* Clear key from memory */
 void		 ntag21x_tag_free(FreefareTag tag);
 int		 ntag21x_connect(FreefareTag tag);
 int		 ntag21x_disconnect(FreefareTag tag);
@@ -147,7 +206,10 @@ int		 ntag21x_authenticate(FreefareTag tag, const NTAG21xKey key);  /* Authentic
 bool		 is_ntag21x(FreefareTag tag);  /* Check if tag type is NTAG21x */
 bool		 ntag21x_is_auth_supported(nfc_device *device, nfc_iso14443a_info nai);  /* Check if tag supports 21x commands */
 
-
+NTAG21xKey	 ntag21x_key_new(const uint8_t data[4], const uint8_t pack[2]); /* Create new key */
+void		 ntag21x_key_free(NTAG21xKey key);  /* Clear key from memory */
+
+/******** Mifare Classic functions *******************************************/
 
 bool             mifare_mini_taste(nfc_device *device, nfc_target target);
 bool		 mifare_classic1k_taste(nfc_device *device, nfc_target target);
@@ -156,14 +218,6 @@ FreefareTag      mifare_mini_tag_new(nfc_device *device, nfc_target target);
 FreefareTag	 mifare_classic1k_tag_new(nfc_device *device, nfc_target target);
 FreefareTag	 mifare_classic4k_tag_new(nfc_device *device, nfc_target target);
 void		 mifare_classic_tag_free(FreefareTag tag);
-
-typedef unsigned char MifareClassicBlock[16];
-
-typedef uint8_t MifareClassicSectorNumber;
-typedef uint8_t MifareClassicBlockNumber;
-
-typedef enum { MFC_KEY_A, MFC_KEY_B } MifareClassicKeyType;
-typedef uint8_t MifareClassicKey[6];
 
 /* NFC Forum public key */
 extern const MifareClassicKey mifare_classic_nfcforum_public_key_a;
@@ -217,15 +271,6 @@ MifareClassicBlockNumber  mifare_classic_sector_last_block(MifareClassicSectorNu
 #define MCAB_READ_KEYB         0x004
 #define MCAB_WRITE_KEYB        0x001
 
-struct mad_aid {
-    uint8_t application_code;
-    uint8_t function_cluster_code;
-};
-typedef struct mad_aid MadAid;
-
-struct mad;
-typedef struct mad *Mad;
-
 /* MAD Public read key A */
 extern const MifareClassicKey mad_public_key_a;
 
@@ -258,9 +303,7 @@ int		 mifare_application_free(Mad mad, const MadAid aid);
 
 MifareClassicSectorNumber *mifare_application_find(Mad mad, const MadAid aid);
 
-
-
-bool		 mifare_desfire_taste(nfc_device *device, nfc_target target);
+/******** Mifare DESFire functions *******************************************/
 
 /* File types */
 
@@ -377,24 +420,6 @@ bit 0: PICC master key frozen (reversible with configuration change or when form
 #define TAG_INFO_MISSING_ERROR	0xBA
 #define UNKNOWN_TAG_TYPE_ERROR	0xBB
 
-struct mifare_desfire_aid;
-typedef struct mifare_desfire_aid *MifareDESFireAID;
-
-struct mifare_desfire_df {
-    uint32_t aid;
-    uint16_t fid;
-    uint8_t df_name[16];
-    size_t df_name_len;
-};
-typedef struct mifare_desfire_df MifareDESFireDF;
-
-MifareDESFireAID mifare_desfire_aid_new(uint32_t aid);
-MifareDESFireAID mifare_desfire_aid_new_with_mad_aid(MadAid mad_aid, uint8_t n);
-uint32_t	 mifare_desfire_aid_get_aid(MifareDESFireAID aid);
-
-uint8_t		 mifare_desfire_last_pcd_error(FreefareTag tag);
-uint8_t		 mifare_desfire_last_picc_error(FreefareTag tag);
-
 #pragma pack (push)
 #pragma pack (1)
 struct mifare_desfire_version_info {
@@ -445,8 +470,14 @@ struct mifare_desfire_file_settings {
     } settings;
 };
 
+
+bool		 mifare_desfire_taste(nfc_device *device, nfc_target target);
+
 FreefareTag	 mifare_desfire_tag_new(nfc_device *device, nfc_target target);
 void		 mifare_desfire_tag_free(FreefareTag tags);
+
+uint8_t		 mifare_desfire_last_pcd_error(FreefareTag tag);
+uint8_t		 mifare_desfire_last_picc_error(FreefareTag tag);
 
 int		 mifare_desfire_connect(FreefareTag tag);
 int		 mifare_desfire_disconnect(FreefareTag tag);
@@ -514,15 +545,13 @@ int		 mifare_desfire_clear_record_file(FreefareTag tag, uint8_t file_no);
 int		 mifare_desfire_commit_transaction(FreefareTag tag);
 int		 mifare_desfire_abort_transaction(FreefareTag tag);
 
-typedef enum mifare_key_type {
-    MIFARE_KEY_DES,
-    MIFARE_KEY_2K3DES,
-    MIFARE_KEY_3K3DES,
-    MIFARE_KEY_AES128,
+/******** Mifare DESFire AIDs ************************************************/
 
-    MIFARE_KEY_LAST = MIFARE_KEY_AES128,
-    MIFARE_KEY_INVALID = MIFARE_KEY_LAST + 1,
-} MifareKeyType;
+MifareDESFireAID mifare_desfire_aid_new(uint32_t aid);
+MifareDESFireAID mifare_desfire_aid_new_with_mad_aid(MadAid mad_aid, uint8_t n);
+uint32_t	 mifare_desfire_aid_get_aid(MifareDESFireAID aid);
+
+/******** Mifare DESFire keys ************************************************/
 
 MifareKeyType    mifare_keytype_from_string(const char *buf, size_t len);
 const char      *mifare_keytype_to_string(MifareKeyType type);
@@ -544,6 +573,7 @@ int              mifare_desfire_key_from_string(MifareDESFireKey *out, const cha
 int              mifare_desfire_key_to_string(MifareDESFireKey key, char *buf, size_t len);
 void		 mifare_desfire_key_free(MifareDESFireKey key);
 
+/******** Mifare DESFire key derivation **************************************/
 
 #define AN10922_FLAG_DEFAULT            0
 #define AN10922_FLAG_EMULATE_ISSUE_91   (1<<1)
@@ -557,6 +587,8 @@ int		 mifare_key_deriver_update_cstr(MifareKeyDeriver deriver, const char *cstr)
 MifareDESFireKey mifare_key_deriver_end(MifareKeyDeriver deriver);
 int		 mifare_key_deriver_end_raw(MifareKeyDeriver deriver, uint8_t* diversified_bytes, size_t data_max_len);
 void		 mifare_key_deriver_free(MifareKeyDeriver state);
+
+/******** TLV utilities *******************************************************/
 
 uint8_t		*tlv_encode(const uint8_t type, const uint8_t *istream, uint16_t isize, size_t *osize);
 uint8_t		*tlv_decode(const uint8_t *istream, uint8_t *type, uint16_t *size);
