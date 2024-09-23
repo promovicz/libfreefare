@@ -5,6 +5,7 @@ lib_LTLIBRARIES = libfreefare.la
 
 libfreefare_la_SOURCES = felica.c \
 			 freefare.c \
+			 freefare_tlv.c \
 			 mifare_classic.c \
 			 mifare_ultralight.c \
 			 mifare_desfire.c \
@@ -16,8 +17,7 @@ libfreefare_la_SOURCES = felica.c \
 			 mad.c \
 			 mifare_application.c \
 			 ntag21x.c \
-			 ntag21x_error.c \
-			 tlv.c
+			 ntag21x_error.c
 libfreefare_la_LIBADD =
 
 if WITH_DEBUG
@@ -35,6 +35,7 @@ libfreefare_ladir = $(includedir)
 
 man_MANS = freefare.3 \
 	   freefare_error.3 \
+	   freefare_tlv.3 \
 	   mad.3 \
 	   mifare_application.3 \
 	   mifare_classic.3 \
@@ -43,8 +44,7 @@ man_MANS = freefare.3 \
 	   mifare_desfire_key.3 \
 	   mifare_key_deriver.3 \
 	   mifare_ultralight.3 \
-	   ntag21x.3 \
-	   tlv.3
+	   ntag21x.3
 
 linkedman = \
 	    freefare.3 freefare_free_tags.3 \
@@ -59,6 +59,8 @@ linkedman = \
 	    freefare_error.3 freefare_strerror_r.3 \
 	    freefare_error.3 mifare_desfire_last_pcd_error.3 \
 	    freefare_error.3 mifare_desfire_last_picc_error.3 \
+            freefare_tlv.3 freefare_tlv_decode.3 \                               
+            freefare_tlv.3 freefare_tlv_encode.3 \
 	    mad.3 mad_free.3 \
 	    mad.3 mad_get_aid.3 \
 	    mad.3 mad_get_card_publisher_sector.3 \
@@ -158,9 +160,7 @@ linkedman = \
 	    mifare_ultralight.3 mifare_ultralight_get_uid.3 \
 	    mifare_ultralight.3 mifare_ultralight_read.3 \
 	    mifare_ultralight.3 mifare_ultralight_write.3 \
-	    mifare_ultralight.3 mifare_ultralightc_authenticate.3 \
-	    tlv.3 tlv_decode.3 \
-	    tlv.3 tlv_encode.3
+	    mifare_ultralight.3 mifare_ultralightc_authenticate.3
 
 install-data-hook:
 	(cd $(DESTDIR)$(man3dir); for i in `echo $(linkedman) | xargs -n2 echo | awk '{print $$2}'`; do rm -f $$i; done; echo $(linkedman) | xargs -n2 $(LN_S))

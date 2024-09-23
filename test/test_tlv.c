@@ -48,7 +48,7 @@ test_tlv_encode_short(void)
     uint8_t *res;
     size_t osize;
 
-    res = tlv_encode(3, shortdata, sizeof(shortdata), &osize);
+    res = freefare_tlv_encode(3, shortdata, sizeof(shortdata), &osize);
     cut_assert_equal_int(sizeof(eshortdata), osize, cut_message("Wrong encoded message length."));
     cut_assert_equal_int(3, res[0], cut_message("Wrong type"));
     cut_assert_equal_int(sizeof(shortdata), res[1], cut_message("Wrong value length"));
@@ -62,7 +62,7 @@ test_tlv_encode_long(void)
     uint8_t *res;
     size_t osize;
 
-    res = tlv_encode(7, longdata, sizeof(longdata), &osize);
+    res = freefare_tlv_encode(7, longdata, sizeof(longdata), &osize);
     cut_assert_equal_int(sizeof(elongdata), osize, cut_message("Wrong encoded message length."));
     cut_assert_equal_int(7, res[0], cut_message("Wrong type"));
     cut_assert_equal_int(0xff, res[1], cut_message("Wrong value length"));
@@ -79,7 +79,7 @@ test_tlv_decode_short(void)
     uint16_t size;
     uint8_t type;
 
-    res = tlv_decode(eshortdata, &type, &size);
+    res = freefare_tlv_decode(eshortdata, &type, &size);
     cut_assert_equal_int(3, type, cut_message("Wrong type"));
     cut_assert_equal_int(sizeof(shortdata), size, cut_message("Wrong value length"));
     cut_assert_equal_memory(shortdata, sizeof(shortdata), res, size, cut_message("Wrong decoded value"));
@@ -93,7 +93,7 @@ test_tlv_decode_long(void)
     uint16_t size;
     uint8_t type;
 
-    res = tlv_decode(elongdata, &type, &size);
+    res = freefare_tlv_decode(elongdata, &type, &size);
     cut_assert_equal_int(7, type, cut_message("Wrong type"));
     cut_assert_equal_int(sizeof(longdata), size, cut_message("Wrong value length"));
     cut_assert_equal_memory(longdata, sizeof(longdata), res, size, cut_message("Wrong decoded value"));
@@ -106,7 +106,7 @@ test_tlv_rfu(void)
     uint8_t *data = malloc(0xffff);
     cut_assert_not_null(data, cut_message("Out of memory"));
 
-    uint8_t *res = tlv_encode(7, data, 0xffff, NULL);
+    uint8_t *res = freefare_tlv_encode(7, data, 0xffff, NULL);
     cut_assert_null(res, cut_message("Size reserved for future use"));
 
     free(data);
@@ -120,8 +120,8 @@ test_tlv_append(void)
 
     uint8_t ndef_ab_ref[] = { 0x03, 0x04, 0xde, 0xad, 0xbe, 0xef, 0x03, 0x01, 0x42, 0xfe };
 
-    uint8_t *ndef_a = tlv_encode(3, a, 4, NULL);
-    uint8_t *ndef_b = tlv_encode(3, b, 1, NULL);
+    uint8_t *ndef_a = freefare_tlv_encode(3, a, 4, NULL);
+    uint8_t *ndef_b = freefare_tlv_encode(3, b, 1, NULL);
     ndef_a = tlv_append(ndef_a, ndef_b);
     cut_assert_equal_memory(ndef_ab_ref, sizeof(ndef_ab_ref), ndef_a, sizeof(ndef_ab_ref), cut_message("Wrong appended data"));
 

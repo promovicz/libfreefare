@@ -2,6 +2,7 @@ set(LIBRARY_SOURCES
 		felica
 		freefare
 		freefare_internal
+		freefare_tlv
 		mad
 		mifare_application
 		mifare_classic
@@ -14,7 +15,6 @@ set(LIBRARY_SOURCES
 		mifare_ultralight
 		ntag21x
 		ntag21x_error
-		tlv
 		../contrib/libutil/hexdump
 		)
 

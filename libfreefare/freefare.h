@@ -126,6 +126,13 @@ void		 freefare_free_tags(FreefareTag *tags);
 bool		 freefare_selected_tag_is_present(nfc_device *device);
 void		 freefare_set_tag_timeout(FreefareTag tag, int timeout);
 
+/******** Freefare TLV utilities *********************************************/
+
+uint8_t		*freefare_tlv_encode(const uint8_t type, const uint8_t *istream, uint16_t isize, size_t *osize);
+uint8_t		*freefare_tlv_decode(const uint8_t *istream, uint8_t *type, uint16_t *size);
+size_t		freefare_tlv_record_length(const uint8_t *istream, size_t *field_length_size, size_t *field_value_size);
+uint8_t		*freefare_tlv_append(uint8_t *a, uint8_t *b);
+
 
 /******** Felica functions ***************************************************/
 
@@ -587,13 +594,6 @@ int		 mifare_key_deriver_update_cstr(MifareKeyDeriver deriver, const char *cstr)
 MifareDESFireKey mifare_key_deriver_end(MifareKeyDeriver deriver);
 int		 mifare_key_deriver_end_raw(MifareKeyDeriver deriver, uint8_t* diversified_bytes, size_t data_max_len);
 void		 mifare_key_deriver_free(MifareKeyDeriver state);
-
-/******** TLV utilities *******************************************************/
-
-uint8_t		*tlv_encode(const uint8_t type, const uint8_t *istream, uint16_t isize, size_t *osize);
-uint8_t		*tlv_decode(const uint8_t *istream, uint8_t *type, uint16_t *size);
-size_t		tlv_record_length(const uint8_t *istream, size_t *field_length_size, size_t *field_value_size);
-uint8_t		*tlv_append(uint8_t *a, uint8_t *b);
 
 #ifdef __cplusplus
 }

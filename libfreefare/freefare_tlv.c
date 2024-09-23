@@ -40,7 +40,6 @@
 
 #define TLV_TERMINATOR 0xFE
 
-size_t		 tlv_record_length(const uint8_t *stream, size_t *field_length_size, size_t *field_value_size);
 uint8_t		*tlv_next(uint8_t *stream);
 size_t		 tlv_sequence_length(uint8_t *stream);
 
@@ -52,7 +51,7 @@ size_t		 tlv_sequence_length(uint8_t *stream);
  * Encode data stream into TLV.
  */
 uint8_t *
-tlv_encode(const uint8_t type, const uint8_t *istream, uint16_t isize, size_t *osize)
+freefare_tlv_encode(const uint8_t type, const uint8_t *istream, uint16_t isize, size_t *osize)
 {
     uint8_t *res;
     off_t n = 0;
@@ -91,7 +90,7 @@ tlv_encode(const uint8_t type, const uint8_t *istream, uint16_t isize, size_t *o
  * Decode TLV from data stream.
  */
 uint8_t *
-tlv_decode(const uint8_t *istream, uint8_t *type, uint16_t *size)
+freefare_tlv_decode(const uint8_t *istream, uint8_t *type, uint16_t *size)
 {
     size_t fls = 0;
     size_t fvs = 0;
@@ -100,7 +99,7 @@ tlv_decode(const uint8_t *istream, uint8_t *type, uint16_t *size)
     if (type)
 	*type = istream[0];
 
-    tlv_record_length(istream, &fls, &fvs);
+    freefare_tlv_record_length(istream, &fls, &fvs);
 
     if (size) {
 	*size = fvs;
@@ -116,7 +115,7 @@ tlv_decode(const uint8_t *istream, uint8_t *type, uint16_t *size)
  * Length of a TLV field
  */
 size_t
-tlv_record_length(const uint8_t *stream, size_t *field_length_size, size_t *field_value_size)
+freefare_tlv_record_length(const uint8_t *stream, size_t *field_length_size, size_t *field_value_size)
 {
     size_t fls = 0;
     size_t fvs = 0;
@@ -163,7 +162,7 @@ tlv_next(uint8_t *stream)
 {
     uint8_t *res = NULL;
     if (stream[0] != TLV_TERMINATOR)
-	res = stream + tlv_record_length(stream, NULL, NULL);
+	res = stream + freefare_tlv_record_length(stream, NULL, NULL);
 
     return res;
 }
@@ -177,7 +176,7 @@ tlv_sequence_length(uint8_t *stream)
     size_t res = 0;
 
     do {
-	res += tlv_record_length(stream, NULL, NULL);
+	res += freefare_tlv_record_length(stream, NULL, NULL);
     } while ((stream = tlv_next(stream)));
 
     return res;
