@@ -17,6 +17,7 @@
 uint8_t key_data_picc[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 struct {
+    const char *device;
     bool noconfirm;
 } options = {
     .noconfirm = false
@@ -25,11 +26,12 @@ struct {
 static void
 usage(char *progname)
 {
-    fprintf(stderr, "usage: %s [-d device] [-y] [-K 11223344AABBCCDD]\n", progname);
+    fprintf(stderr, "usage: %s [-y] [-d device] [-K 11223344AABBCCDD]\n", progname);
     fprintf(stderr, "\nOptions:\n");
     fprintf(stderr, "  -d  NFC device string\n");
     fprintf(stderr, "  -y  Do not ask for confirmation (dangerous)\n");
     fprintf(stderr, "  -K  Provide another PICC key than the default one\n");
+    fprintf(stderr, "  -h  Request help (this message)\n");
 }
 
 static int
@@ -40,6 +42,9 @@ getopts(int argc, char **argv)
 	switch (opt) {
 	case 'h':
 	    return 1; /* help requested */
+	case 'd':
+	    options.device = optarg;
+	    break;
 	case 'y':
 	    options.noconfirm = true;
 	    break;
@@ -122,7 +127,7 @@ main(int argc, char *argv[])
 	    /* Ask for confirmation */
 	    bool format = true;
 	    char buffer[BUFSIZ];
-	    if (!options.unconfirmed) {
+	    if (!options.noconfirm) {
 		printf("Format [yN] ");
 		fgets(buffer, BUFSIZ, stdin);
 		format = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
