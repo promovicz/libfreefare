@@ -133,7 +133,6 @@ uint8_t		*freefare_tlv_decode(const uint8_t *istream, uint8_t *type, uint16_t *s
 size_t		freefare_tlv_record_length(const uint8_t *istream, size_t *field_length_size, size_t *field_value_size);
 uint8_t		*freefare_tlv_append(uint8_t *a, uint8_t *b);
 
-
 /******** Felica functions ***************************************************/
 
 #define FELICA_SC_RW 0x0009
@@ -562,24 +561,42 @@ uint32_t	 mifare_desfire_aid_get_aid(MifareDESFireAID aid);
 
 /******** Mifare DESFire keys ************************************************/
 
+/* Get the Mifare key type represented by the given string */
 MifareKeyType    mifare_keytype_from_string(const char *buf, size_t len);
+/* Convert a Mifare key type to a string */
 const char      *mifare_keytype_to_string(MifareKeyType type);
 
+/* Generic constructor for Mifare keys */
 MifareDESFireKey mifare_desfire_key_new(MifareKeyType type, uint8_t version, const void *buf, size_t len);
+/* Constructor for Mifare keys using DES, with key version 0 */
 MifareDESFireKey mifare_desfire_des_key_new(const uint8_t value[8]);
+/* Constructor for Mifare keys using DES, with the version encoded in the secret */
 MifareDESFireKey mifare_desfire_des_key_new_with_version(const uint8_t value[8]);
+/* Constructor for Mifare keys using 2K3DES, with key version 0 */
 MifareDESFireKey mifare_desfire_3des_key_new(const uint8_t value[16]);
+/* Constructor for Mifare keys using 2K3DES, with the version encoded in the secret */
 MifareDESFireKey mifare_desfire_3des_key_new_with_version(const uint8_t value[16]);
+/* Constructor for Mifare keys using 3K3DES, with key version 0 */
 MifareDESFireKey mifare_desfire_3k3des_key_new(const uint8_t value[24]);
+/* Constructor for Mifare keys using 3K3DES, with the version encoded in the secret */
 MifareDESFireKey mifare_desfire_3k3des_key_new_with_version(const uint8_t value[24]);
+/* Constructor for Mifare keys using AES128, with key version 0 */
 MifareDESFireKey mifare_desfire_aes_key_new(const uint8_t value[16]);
+/* Constructor for Mifare keys using 3K3DES, with the version specified explicitly */
 MifareDESFireKey mifare_desfire_aes_key_new_with_version(const uint8_t value[16], uint8_t version);
+/* Get the key type of a Mifare key */
 MifareKeyType	 mifare_desfire_key_get_type(MifareDESFireKey key);
+/* Get the key length of a Mifare key, in bytes */
 size_t		 mifare_desfire_key_get_length(MifareDESFireKey key);
+/* Get the key version of a Mifare key */
 uint8_t		 mifare_desfire_key_get_version(MifareDESFireKey key);
+/* Set the key version of a Mifare key */
 void		 mifare_desfire_key_set_version(MifareDESFireKey key, uint8_t version);
+/* Construct a Mifare key from a string */
 int              mifare_desfire_key_from_string(MifareDESFireKey *out, const char *buf, size_t len);
+/* Convert a Mifare key to a string */
 int              mifare_desfire_key_to_string(MifareDESFireKey key, char *buf, size_t len);
+/* Free a Mifare key */
 void		 mifare_desfire_key_free(MifareDESFireKey key);
 
 /******** Mifare DESFire key derivation **************************************/
