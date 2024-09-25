@@ -241,6 +241,18 @@ mifare_desfire_key_get_length(MifareDESFireKey key)
     }
 }
 
+size_t
+mifare_desfire_key_get_secret(MifareDESFireKey key, char *buf, size_t len)
+{
+    return 0;
+}
+
+size_t
+mifare_desfire_key_set_secret(MifareDESFireKey key, const char *buf, size_t len)
+{
+    return 0;
+}
+
 uint8_t
 mifare_desfire_key_get_version(MifareDESFireKey key)
 {
