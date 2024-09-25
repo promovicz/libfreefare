@@ -17,20 +17,28 @@
 uint8_t key_data_picc[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 struct {
+    /* NFC device string */
     const char *device;
+    /* Skip confirmation */
     bool noconfirm;
+    /* Card master key */
+    MifareDESFireKey cmk;
 } options = {
-    .noconfirm = false
+    .device = NULL,
+    .noconfirm = false,
+    .cmk = NULL,
 };
 
 static void
 usage(char *progname)
 {
-    fprintf(stderr, "usage: %s [-y] [-d device] [-K 11223344AABBCCDD]\n", progname);
-    fprintf(stderr, "\nOptions:\n");
+    fprintf(stderr, "Usage: %s [-y] [-d device] [-K 11223344AABBCCDD]\n\n", progname);
+    fprintf(stderr, "Perform a formatting procedure on Mifare DESFire NFC tags.\n\n");
+    fprintf(stderr, "Options:\n");
     fprintf(stderr, "  -d  NFC device string\n");
-    fprintf(stderr, "  -y  Do not ask for confirmation (dangerous)\n");
-    fprintf(stderr, "  -K  Provide another PICC key than the default one\n");
+    fprintf(stderr, "  -k  Reset card master key\n");
+    fprintf(stderr, "  -y  Skip confirmation (dangerous)\n");
+    fprintf(stderr, "  -K  Card master key (see below for syntax)\n");
     fprintf(stderr, "  -h  Request help (this message)\n");
 }
 
@@ -67,6 +75,22 @@ getopts(int argc, char **argv)
     return 0;
 }
 
+char ask_options(const char *question, const char *options)
+{
+}
+
+bool ask_yesno(const char *question)
+{
+    const char options = "yN";
+    return false;
+}
+
+int
+do_format(FreefareTag tag)
+{
+    int res;
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -76,6 +100,9 @@ main(int argc, char *argv[])
     size_t device_count;
     nfc_device *device;
     FreefareTag *tags;
+
+    /* Construct default key */
+    MifareDESFireKey key_default = mifare_desfire_des_key_new_with_version(key_data_picc);
 
     /* Parse options */
     res = getopts(argc, argv);
@@ -93,6 +120,12 @@ main(int argc, char *argv[])
     device_count = nfc_list_devices(context, devices, MAX_NFC_DEVICES);
     if (device_count <= 0)
 	errx(EXIT_FAILURE, "No NFC device found.");
+
+    /* Determine card master key */
+    MifareDESFireKey key = key_default;
+    if(options.cmk) {
+	key = options.cmk;
+    }
 
     /* Scan devices */
     for (size_t d = 0; d < device_count; d++) {
@@ -142,40 +175,47 @@ main(int argc, char *argv[])
 		    break;
 		}
 
-		MifareDESFireKey key_picc = mifare_desfire_des_key_new_with_version(key_data_picc);
-		res = mifare_desfire_authenticate(tag, 0, key_picc);
+		/* Authenticate to master application */
+		res = mifare_desfire_authenticate(tag, 0, key);
 		if (res < 0) {
 		    warnx("Can't authenticate on Mifare DESFire target.");
 		    break;
 		}
-		mifare_desfire_key_free(key_picc);
 
-		// Send Mifare DESFire ChangeKeySetting to change the PICC master key settings into :
-		// bit7-bit4 equal to 0000b
-		// bit3 equal to 1b, the configuration of the PICC master key MAY be changeable or frozen
-		// bit2 equal to 1b, CreateApplication and DeleteApplication commands are allowed without PICC master key authentication
-		// bit1 equal to 1b, GetApplicationIDs, and GetKeySettings are allowed without PICC master key authentication
-		// bit0 equal to 1b, PICC masterkey MAY be frozen or changeable
+		/* Reset master key settings */
 		res = mifare_desfire_change_key_settings(tag, 0x0F);
-		if (res < 0)
+		if (res < 0) {
 		    errx(EXIT_FAILURE, "ChangeKeySettings failed");
+		}
+
+		/* Perform formatting */
 		res = mifare_desfire_format_picc(tag);
 		if (res < 0) {
 		    warn("Can't format PICC.");
 		    break;
 		}
 
+		/* Disconnect from the tag */
 		mifare_desfire_disconnect(tags[i]);
 	    }
 
+	    /* Free the tag UID */
 	    free(tag_uid);
 	}
 
+	/* Free the tag list */
 	freefare_free_tags(tags);
+
+	/* Close the device */
 	nfc_close(device);
     }
+
+    /* Free the default key */
+    mifare_desfire_key_free(key_default);
+
+    /* Finalize libnfc */
     nfc_exit(context);
 
+    /* Done */
     return 0;
 } /* main() */
-
