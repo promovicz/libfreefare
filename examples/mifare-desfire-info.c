@@ -17,6 +17,12 @@ static void scan_tag(nfc_connstring dev, FreefareTag tag);
 static void scan_file(FreefareTag tag, MifareDESFireAID app, uint8_t fid);
 static void scan_application(FreefareTag tag, MifareDESFireAID app);
 
+struct {
+    const char *device;
+} options = {
+    .device = NULL,
+};
+
 int
 main(int argc, char *argv[])
 {
@@ -101,10 +107,12 @@ static void scan_tag(nfc_connstring dev, FreefareTag tag) {
     /* Get and print the announced UID */
     char *tag_uid = freefare_get_tag_uid(tag);
     printf("desfire %s via %s\n", tag_uid, dev);
+
+    /* Check if the UID looks real or random */
     if (strlen(tag_uid) / 2 == 4) {
-	printf("  uid randomized\n");
+	printf("  uid appears randomized\n");
     } else {
-	printf("  uid not randomized\n");
+	printf("  uid appears non-randomized\n");
     }
 
     /* Connect to tag */
