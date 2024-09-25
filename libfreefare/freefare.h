@@ -176,11 +176,13 @@ bool		 ntag21x_taste(nfc_device *device, nfc_target target);
 uint8_t		 ntag21x_last_error(FreefareTag tag);
 
 /* NTAG21x access features */
-#define NTAG_PROT 0x80
-#define NTAG_CFGLCK 0x40
-#define NTAG_NFC_CNT_EN 0x20
-#define NTAG_NFC_CNT_PWD_PROT 0x10
-#define NTAG_AUTHLIM 0x07
+enum ntag21x_access {
+    NTAG_PROT = 0x80,
+    NTAG_CFGLCK = 0x40,
+    NTAG_NFC_CNT_EN = 0x20,
+    NTAG_NFC_CNT_PWD_PROT = 0x10,
+    NTAG_AUTHLIM = 0x07,
+};
 
 FreefareTag	 ntag21x_tag_new(nfc_device *device, nfc_target target);
 FreefareTag	 ntag21x_tag_reuse(FreefareTag tag);  /* Copy data from Ultralight tag to new NTAG21x, don't forget to free your old tag */
