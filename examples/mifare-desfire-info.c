@@ -12,7 +12,7 @@
 
 /* Declarations */
 
-static void scan_device(nfc_connstring dev);
+static void scan_device(nfc_context *context, nfc_connstring dev);
 static void scan_tag(nfc_connstring dev, FreefareTag tag);
 static void scan_file(FreefareTag tag, MifareDESFireAID app, uint8_t fid);
 static void scan_application(FreefareTag tag, MifareDESFireAID app);
@@ -45,7 +45,7 @@ main(int argc, char *argv[])
 
     /* Scan each device */
     for (size_t d = 0; d < device_count; d++) {
-	scan_device(&devices[d]);
+	scan_device(context, &devices[d]);
     }
 
     /* Print whitespace */
@@ -60,7 +60,7 @@ main(int argc, char *argv[])
     return 0;
 }
 
-static void scan_device(nfc_connstring dev) {
+static void scan_device(nfc_context *context, nfc_connstring dev) {
     /* Open the device */
     nfc_device *device = nfc_open(context, *dev);
     if (!device) {
