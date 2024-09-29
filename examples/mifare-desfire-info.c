@@ -12,7 +12,7 @@
 
 /* Declarations */
 
-static void scan_device(nfc_context *context, nfc_connstring dev);
+static void scan_device(nfc_context *context, nfc_connstring *dev);
 static void scan_tag(nfc_connstring dev, FreefareTag tag);
 static void scan_file(FreefareTag tag, MifareDESFireAID app, uint8_t fid);
 static void scan_application(FreefareTag tag, MifareDESFireAID app);
@@ -60,7 +60,7 @@ main(int argc, char *argv[])
     return 0;
 }
 
-static void scan_device(nfc_context *context, nfc_connstring dev) {
+static void scan_device(nfc_context *context, nfc_connstring *dev) {
     /* Open the device */
     nfc_device *device = nfc_open(context, *dev);
     if (!device) {
@@ -122,32 +122,6 @@ static void scan_tag(nfc_connstring dev, FreefareTag tag) {
 	goto skip_reading;
     }
 
-    /* Get and print version information */
-    struct mifare_desfire_version_info info;
-    res = mifare_desfire_get_version(tag, &info);
-    if (res < 0) {
-	freefare_perror(tag, "mifare_desfire_get_version");
-    } else {
-	printf("  version information:\n", tag_uid);
-	printf("    UID:                      0x%02x%02x%02x%02x%02x%02x%02x\n", info.uid[0], info.uid[1], info.uid[2], info.uid[3], info.uid[4], info.uid[5], info.uid[6]);
-	printf("    Batch number:             0x%02x%02x%02x%02x%02x\n", info.batch_number[0], info.batch_number[1], info.batch_number[2], info.batch_number[3], info.batch_number[4]);
-	printf("    Production date:          week %x, 20%02x\n", info.production_week, info.production_year);
-	printf("    Hardware Information:\n");
-	printf("      Vendor ID:            0x%02x\n", info.hardware.vendor_id);
-	printf("      Type:                 0x%02x\n", info.hardware.type);
-	printf("      Subtype:              0x%02x\n", info.hardware.subtype);
-	printf("      Version:              %d.%d\n", info.hardware.version_major, info.hardware.version_minor);
-	printf("      Storage size:         0x%02x (%s%d bytes)\n", info.hardware.storage_size, (info.hardware.storage_size & 1) ? ">" : "=", 1 << (info.hardware.storage_size >> 1));
-	printf("      Protocol:             0x%02x\n", info.hardware.protocol);
-	printf("    Software Information:\n");
-	printf("      Vendor ID:            0x%02x\n", info.software.vendor_id);
-	printf("      Type:                 0x%02x\n", info.software.type);
-	printf("      Subtype:              0x%02x\n", info.software.subtype);
-	printf("      Version:              %d.%d\n", info.software.version_major, info.software.version_minor);
-	printf("      Storage size:         0x%02x (%s%d bytes)\n", info.software.storage_size, (info.software.storage_size & 1) ? ">" : "=", 1 << (info.software.storage_size >> 1));
-	printf("      Protocol:             0x%02x\n", info.software.protocol);
-    }
-
     /* Get and print memory information */
     uint32_t size;
     res = mifare_desfire_free_mem(tag, &size);
@@ -166,6 +140,25 @@ static void scan_tag(nfc_connstring dev, FreefareTag tag) {
 	printf("  master key version UNKNOWN\n", version, version);
     }
 
+    /* Construct default key */
+    uint8_t secret_default[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    MifareDESFireKey key_default = mifare_desfire_des_key_new_with_version(secret_default);
+    res = mifare_desfire_authenticate(tag, 0, key_default);
+    if(res == 0) {
+	printf("  authenticated with default key\n");
+    } else {
+	printf("  unable to authenticate\n");
+    }
+
+    /* Try to read the actual UID */
+    char *card_uid;
+    res = mifare_desfire_get_card_uid(tag, &card_uid);
+    if(res == 0) {
+	printf("  actual uid %s\n", card_uid);
+    } else {
+	printf("  actual uid UNKNOWN\n");
+    }
+
     /* Get and print master key settings */
     uint8_t settings;
     uint8_t max_keys;
@@ -180,6 +173,39 @@ static void scan_tag(nfc_connstring dev, FreefareTag tag) {
 	printf("  master key settings LOCKED\n");
     } else {
 	freefare_perror(tag, "mifare_desfire_get_key_settings");
+    }
+
+    /* Get and print version information */
+    struct mifare_desfire_version_info info;
+    res = mifare_desfire_get_version(tag, &info);
+    if (res < 0) {
+	freefare_perror(tag, "mifare_desfire_get_version");
+    } else {
+	printf("  version information:\n");
+	printf("    manifest uid %02x%02x%02x%02x%02x%02x%02x\n",
+	       info.uid[0], info.uid[1], info.uid[2], info.uid[3], info.uid[4], info.uid[5], info.uid[6]);
+	printf("    batch number 0x%02x%02x%02x%02x%02x\n",
+	       info.batch_number[0], info.batch_number[1], info.batch_number[2], info.batch_number[3], info.batch_number[4]);
+	printf("    production week %x/20%02x\n", info.production_week, info.production_year);
+	printf("    hardware vendor 0x%02x type 0x%02x subtype 0x%02x version %d.%d\n"
+	       "      storage size 0x%02d (%s%d bytes) protocol 0x%02d\n",
+	       info.hardware.vendor_id, info.hardware.type, info.hardware.subtype,
+	       info.hardware.version_major, info.hardware.version_minor,
+	       info.hardware.storage_size,
+	       (info.hardware.storage_size & 1) ? ">" : "=",
+	       1 << (info.hardware.storage_size >> 1),
+	       info.hardware.protocol);
+	printf("    software vendor 0x%02x type 0x%02x subtype 0x%02x version %d.%d\n"
+	       "      storage size 0x%02x (%s%d bytes) protocol 0x%02x\n",
+	       info.software.vendor_id,
+	       info.software.type,
+	       info.software.subtype,
+	       info.software.version_major,
+	       info.software.version_minor,
+	       info.software.storage_size,
+	       (info.software.storage_size & 1) ? ">" : "=",
+	       1 << (info.software.storage_size >> 1),
+	       info.software.protocol);
     }
 
     /* List applications */
@@ -242,7 +268,12 @@ static void scan_application(FreefareTag tag, MifareDESFireAID app) {
 	freefare_perror(tag, "mifare_desfire_get_key_settings");
     }
 
-    /* List files */
+    /* List files by DF */
+    struct mifare_desfire_df *dfs;
+    size_t df_count;
+    res = mifare_desfire_get_df_names(tag, &dfs, &df_count);
+
+    /* List files by FID */
     uint8_t *files;
     size_t file_count;
     res = mifare_desfire_get_file_ids(tag, &files, &file_count);
@@ -270,5 +301,11 @@ static void scan_application(FreefareTag tag, MifareDESFireAID app) {
 }
 
 static void scan_file(FreefareTag tag, MifareDESFireAID app, uint8_t fid) {
+    int res;
+
     printf("    file %02x\n", fid);
+
+    /* Get and print file settings */
+    struct mifare_desfire_file_settings settings;
+    res = mifare_desfire_get_file_settings(tag, fid, &settings);
 }
