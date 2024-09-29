@@ -14,7 +14,7 @@
 
 #define MAX_NFC_DEVICES 32
 
-uint8_t key_data_picc[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+uint8_t secret_default[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 struct {
     /* NFC device string */
@@ -57,15 +57,7 @@ getopts(int argc, char **argv)
 	    options.noconfirm = true;
 	    break;
 	case 'K':
-	    if (strlen(optarg) != 16) {
-		return -1;
-	    }
-	    uint64_t n = strtoull(optarg, NULL, 16);
-	    int i;
-	    for (i = 7; i >= 0; i--) {
-		key_data_picc[i] = (uint8_t) n;
-		n >>= 8;
-	    }
+	    /* FIXME */
 	    break;
 	default:
 	    return -1;
@@ -102,7 +94,7 @@ main(int argc, char *argv[])
     FreefareTag *tags;
 
     /* Construct default key */
-    MifareDESFireKey key_default = mifare_desfire_des_key_new_with_version(key_data_picc);
+    MifareDESFireKey key_default = mifare_desfire_des_key_new_with_version(secret_default);
 
     /* Parse options */
     res = getopts(argc, argv);
